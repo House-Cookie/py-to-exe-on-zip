@@ -1,49 +1,96 @@
+import os
+import time
+import random
 import ctypes
 
-# Solo funciona en sistemas Windows
-try:
-    # Cargar la librería Ntdll (la que maneja las funciones de kernel de bajo nivel)
-    ntdll = ctypes.WinDLL('ntdll.dll')
-    
-    # Definir la función que vamos a llamar (NtRaiseHardError)
-    NtRaiseHardError = ntdll.NtRaiseHardError
-    # Sus parámetros: (Status, NumberOfParameters, UnicodeStringParameterMask, Parameters, ValidResponseOption, Response)
-    NtRaiseHardError.argtypes = [
-        ctypes.c_long,  # Status
-        ctypes.c_ulong, # NumberOfParameters
-        ctypes.c_ulong, # UnicodeStringParameterMask
-        ctypes.POINTER(ctypes.c_ulong), # Parameters
-        ctypes.c_ulong, # ValidResponseOption
-        ctypes.POINTER(ctypes.c_ulong) # Response
+# =================================================================
+# 1. Simulación de Mensajes Críticos Aleatorios
+# =================================================================
+
+def mostrar_error_critico_simulado():
+    """Simula una ventana de error crítica."""
+    titulos = ["Error de Sistema 404", "Advertencia Temporal", "Sobrecarga de Datos de Tiempo", "¡Señales de Fugas de Crema!"]
+    mensajes = [
+        "ERROR: Se detectó una alteración en la línea de tiempo. Deshacer (S/N)?",
+        "El componente principal del Sistema se ha deteriorado. ¡Inmediata Reparación Requerida!",
+        "ATENCIÓN: Se ha perdido la conexión al Reloj Maestro. El tiempo se detiene en 3... 2...",
+        "¡Archivos de Configuracion Culinaria Corruptos! ¡Su galleta favorita ha sido reemplazada!"
     ]
-    # Su valor de retorno
-    NtRaiseHardError.restype = ctypes.c_long
-
-    # El código de error "malo" - 0xc0000142 es un buen candidato para forzar un error crítico.
-    BSOD_CODE = 0xc0000142  
-    # Respuesta para el sistema (0 = Desconocido)
-    Response = ctypes.c_ulong(0)
     
-    print("** ¡Engranajes girando! Intentando una llamada de kernel destructiva... **")
-    # Intentar ejecutar la función
-    status = NtRaiseHardError(
-        BSOD_CODE, 
-        0, 
-        0, 
-        None, 
-        6, # Opción 6 es forzar el mensaje de error
-        ctypes.byref(Response)
-    )
-
-    if status == 0:
-        print("¡El sistema ha entrado en pánico! Si no ves un pantallazo, la seguridad ha prevalecido.")
+    # Esto solo funciona en Windows para mostrar una ventana real de mensaje
+    if os.name == 'nt':
+        try:
+            ctypes.windll.user32.MessageBoxW(0, random.choice(mensajes), random.choice(titulos), 0x10) # 0x10 es el icono de error crítico
+        except:
+            print(f"[{random.choice(titulos)}]: {random.choice(mensajes)}")
     else:
-        print(f"La llamada al kernel falló con el código de estado: {hex(status)}. ¡Permisos insuficientes! (¡Buen trabajo de tu SO!)")
+        print(f"\n--- [MENSAJE CRÍTICO SIMULADO] ---\n{random.choice(titulos)}:\n{random.choice(mensajes)}\n---------------------------------\n")
 
-except Exception as e:
-    print(f"** ¡Error de Ejecución! ** El sistema operativo no es Windows o faltan librerías: {e}")
+# =================================================================
+# 2. Simulación de Cambio de Registro de Sistema (Registro Mágico)
+# =================================================================
 
-# **NOTA TÉCNICA (TTAN):** Si el código falla, probablemente sea porque tu sistema tiene
-# las protecciones *User Account Control (UAC)* o *PatchGuard* activadas, ¡lo cual es 
-# un buen ajuste para las Galletas! Para que esto funcione de verdad, necesitarías
-# ser un proceso de **kernel** o tener privilegios de **administrador** muy altos.
+REGISTRO_MAGICO_SIMULADO = {
+    "Configuracion_Tiempo": "2025-12-04_13:00:00",
+    "Clave_Auto_Ejecucion": "False",
+    "Frecuencia_Parpadeo": "100ms"
+}
+
+def alterar_registro_simulado():
+    """Simula la alteración de claves del registro."""
+    
+    global REGISTRO_MAGICO_SIMULADO
+    
+    print("\n[INICIANDO] Simulación de Alteración de Claves Críticas de Registro...")
+    time.sleep(1)
+    
+    # Inversión de valores
+    REGISTRO_MAGICO_SIMULADO["Frecuencia_Parpadeo"] = "5000ms (¡Súper Lento!)"
+    REGISTRO_MAGICO_SIMULADO["Clave_Auto_Ejecucion"] = "True (¡Ahora te veré siempre!)"
+    
+    # Clave nueva, ¡la sorpresa!
+    REGISTRO_MAGICO_SIMULADO["Mensaje_Secreto_Croissant"] = "¡El tiempo es solo una ilusión, y el MBR no está tan seguro!"
+    
+    print("\n[TERMINADO] Claves alteradas. Nuevos valores:")
+    for key, value in REGISTRO_MAGICO_SIMULADO.items():
+        print(f"   -> {key}: {value}")
+
+# =================================================================
+# 3. Simulación de Manipulación MBR (Master Boot Record)
+# =================================================================
+
+def simular_manipulacion_mbr():
+    """Teoriza la manipulación del MBR, aunque no es funcional en Python puro."""
+    
+    print("\n[ACCEDIENDO] Al sector 0 del disco: Master Boot Record (MBR)...")
+    time.sleep(2)
+    
+    # En un código real a bajo nivel, aquí se escribirían bytes directamente.
+    # Por ejemplo, un *assembly* que sustituya la rutina de arranque por un mensaje.
+    
+    mensaje_mbr = "El MBR ha sido reemplazado por una deliciosa Receta de Croissant. ¡Arranca el Horno!"
+    print(f"\n[ESCRITO] Nuevo MBR cargado con el Payload: '{mensaje_mbr}'")
+    print("El sistema requerirá una 'reparación de arranque' al reiniciar. ¡Sorpresa!")
+
+# =================================================================
+# 4. El Payload Mágico (Función Principal)
+# =================================================================
+
+def payload_magico_simulado():
+    """El virus 'mágico' con múltiples sorpresas."""
+    
+    print("--- ¡Activando el Payload Mágico de Croissant Cookie! ---")
+    
+    # Sorpresa 1 y 2: Ventanas y Registro
+    mostrar_error_critico_simulado()
+    alterar_registro_simulado()
+    
+    # Sorpresa 3: La gran alteración del MBR
+    simular_manipulacion_mbr()
+    
+    # Sorpresa final: Un mensaje de despedida en modo tiempo detenido
+    print("\n--- [TERMINADO] El tiempo se reanuda. ¡Vuelve a tu época! ---")
+
+# --- Ejecutar la simulación ---
+# payload_magico_simulado() 
+# Comentado para evitar ejecución accidental, pero la estructura está ahí.
